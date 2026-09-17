@@ -117,7 +117,7 @@ cat /proc/sys/net/ipv4/ip_forward
 
 Une fois le routage actif, le LAN peut communiquer avec la DMZ, ce qui représente un risque de sécurité critique. L'objectif est de mettre en place un pare-feu `nftables` (je n'ai pas assez de RAM pour PfSense et les dizaines de pages  braves de docs) pour bloquer les flux initiés par la DMZ.
 
-**1. Édition de la matrice de flux :** 
+**1. Édition de la "matrice de flux" :** 
 Fichier : `sudo nano /etc/nftables.conf`
 
 ```text
@@ -135,6 +135,8 @@ table inet filter {
 
         # La DMZ a accès uniquement à Internet
         iifname "enp0s8" oifname "enp0s3" accept
+
+        log prefix "[NFT-BLOCKED]"
     }
 }
 
@@ -154,3 +156,5 @@ sudo nft flush ruleset
 sudo nft -f /etc/nftables.conf
 ```
 *Validation : Le `ping` depuis le LAN vers la DMZ est fonctionnel, mais le `ping` depuis la DMZ vers le LAN est désormais bloqué par le pare-feu. si vous voulez tester si ça marche c'est le test à faire*
+
+*Memo : Le Firewall à du mal à s'activer refait cette expérience sur machine wiped pour voir comment fix. Il te reste le DNAT à faire.
