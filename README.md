@@ -2,7 +2,7 @@
 
 Ce projet documente la mise en place d'une infrastructure réseau segmentée comprenant un pare-feu sous Linux, une zone démilitarisée (DMZ) et un réseau local (LAN).
 
-## 📝 Informations de connexion (Notes de Lab)
+## Informations de connexion (Notes de Lab)
 *   **Firewall :** `fw` / `#JusteHugoFW`
 *   **DMZ :** `vboxuser` / `#JusteHugoDMZ`
 *   **LAN :** `student` (Machine Labtainer, à changer quand j'aurais plus de stockage)
