@@ -177,6 +177,7 @@ sudo nft -f /etc/nftables.conf
 ## Étape 5 : DNAT (portforwading)
 
 **Firewall**
+
 ```yaml
 #!/usr/sbin/nft -f
 flush ruleset
