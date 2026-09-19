@@ -67,6 +67,23 @@ network:
   version: 2
 ```
 
+**LAN**
+Fichier : `sudo nano /etc/netplan/00-installer-config.yaml`
+```yaml
+network:
+  ethernets:
+    enp0s3:
+      dhcp4: false
+      addresses:
+        - 192.168.100.10/24
+      routes:
+        - to: default
+          via: 192.168.100.254
+      nameservers:
+        addresses: [8.8.8.8, 1.1.1.1]
+  version: 2
+```
+
 **Client LAN (Environnement sans Netplan)**
 Fichier : `sudo nano /etc/network/interfaces`
 ```text
@@ -157,4 +174,52 @@ sudo nft -f /etc/nftables.conf
 ```
 *Validation : Le `ping` depuis le LAN vers la DMZ est fonctionnel, mais le `ping` depuis la DMZ vers le LAN est désormais bloqué par le pare-feu. si vous voulez tester si ça marche c'est le test à faire*
 
-*Memo : Le Firewall à du mal à s'activer refait cette expérience sur machine wiped pour voir comment fix. Il te reste le DNAT à faire.
+## Étape 5 : DNAT (portforwading)
+
+**Firewall**
+```yaml
+#!/usr/sbin/nft -f
+flush ruleset
+
+# --- TABLE DE FILTRAGE (Sécurité) ---
+table inet filter {
+    chain forward {
+        # 1. Politique Zero Trust : tout est bloqué par défaut
+        type filter hook forward priority 0; policy drop;
+
+        ct state established,related accept
+
+        iifname "enp0s9" accept
+
+        iifname "enp0s8" oifname "enp0s3" accept
+        #Nouvelle ligne pour le portforwading du port 80 (http)
+        iifname "enp0s3" oifname "enp0s8" ip daddr 10.10.10.10 tcp dport 80 accept
+        
+        log prefix "[NFT-BLOCKED] "
+    }
+}
+
+# --- TABLE NAT (Routage et Redirection) ---
+table ip nat {
+    # [NOUVEAU] Redirection du trafic entrant (DNAT)
+    chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+        
+        # Tout ce qui arrive sur le port 80 WAN est redirigé vers l'IP de la DMZ
+        iifname "enp0s3" tcp dport 80 dnat to 10.10.10.10
+    }
+
+    # Masquage de l'IP (SNAT) pour sortir sur Internet
+    chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        oifname "enp0s3" masquerade
+    }
+}
+```
+
+**commandes pour remettre le Firewall en état**
+```bash
+sudo nft flush ruleset
+sudo nft -f /etc/nftables.conf
+```
+*Memo : Le Firewall à du mal à s'activer refait cette expérience sur machine wiped pour voir comment fix.
