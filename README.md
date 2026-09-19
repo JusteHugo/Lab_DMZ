@@ -178,7 +178,7 @@ sudo nft -f /etc/nftables.conf
 
 **Firewall**
 
-```yaml
+```text
 #!/usr/sbin/nft -f
 flush ruleset
 
