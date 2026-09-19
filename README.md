@@ -2,6 +2,8 @@
 
 Ce projet documente la mise en place d'une infrastructure réseau segmentée comprenant un pare-feu sous Linux, une zone démilitarisée (DMZ) et un réseau local (LAN).
 
+![Schéma de l'architecture réseau](assets/DMZ.drawio.svg)
+
 ## Informations de connexion (Notes de Lab)
 *   **Firewall :** `fw` / `#JusteHugoFW`
 *   **DMZ :** `vboxuser` / `#JusteHugoDMZ`
@@ -222,5 +224,32 @@ table ip nat {
 ```bash
 sudo nft flush ruleset
 sudo nft -f /etc/nftables.conf
+```
+
+
+## Mémo pour YAML ##
+```yaml
+network:
+  version: 2
+  ethernets:
+    # 1. Exemple d'une carte en IP Dynamique (Client / WAN)
+    enp0s3:
+      dhcp4: true
+      
+    # 2. Exemple d'une carte en IP Statique (Serveur / LAN / DMZ)
+    enp0s8:
+      dhcp4: false
+      addresses:
+        - 192.168.100.10/24         # L'adresse IP et son masque (CIDR)
+      routes:
+        - to: default
+          via: 192.168.100.254      # L'adresse de la passerelle (Passerelle par défaut)
+      nameservers:
+        addresses: [8.8.8.8, 1.1.1.1] # Serveurs DNS séparés par une virgule
+
+et les commandes pour finaliser
+netplan try
+netplan apply
+netplan status
 ```
 *Memo : Le Firewall à du mal à s'activer refait cette expérience sur machine wiped pour voir comment fix.
