@@ -4,11 +4,6 @@ Ce projet documente la mise en place d'une infrastructure réseau segmentée com
 
 ![Schéma de l'architecture réseau](assets/DMZ.drawio.svg)
 
-## Informations de connexion (Notes de Lab)
-*   **Firewall :** `fw` / `#JusteHugoFW`
-*   **DMZ :** `vboxuser` / `#JusteHugoDMZ`
-*   **LAN :** `student` (Machine Labtainer, à changer quand j'aurais plus de stockage)
-
 ---
 
 ## Étape 1 : Configuration des interfaces réseau (Hyperviseur)
@@ -117,7 +112,7 @@ sudo ip route add default via 192.168.100.254
 
 ## Étape 3 : Activation du routage (IP Forwarding)
 
-Par défaut, le noyau Linux refuse de faire transiter des paquets d'une carte réseau à une autre (sécurité native) [Je crois j'ai vu passer ça sur reddit et son code à corriger mon problème :) ]. Pour transformer notre machine Firewall en routeur, il faut activer l'IP Forwarding.
+Par défaut, le noyau Linux refuse de faire transiter des paquets d'une carte réseau à une autre (sécurité native). Pour transformer notre machine Firewall en routeur, il faut activer l'IP Forwarding.
 
 **Modification directe dans le noyau :**
 ```bash
@@ -149,7 +144,7 @@ table inet filter {
         type filter hook forward priority 0; policy drop;
         ct state established,related accept
 
-        #bLAN a accès à la DMZ et à Internet
+        # LAN a accès à la DMZ et à Internet
         iifname "enp0s9" accept
 
         # La DMZ a accès uniquement à Internet
@@ -176,7 +171,7 @@ sudo nft -f /etc/nftables.conf
 ```
 *Validation : Le `ping` depuis le LAN vers la DMZ est fonctionnel, mais le `ping` depuis la DMZ vers le LAN est désormais bloqué par le pare-feu. si vous voulez tester si ça marche c'est le test à faire*
 
-## Étape 5 : DNAT (portforwading)
+## Étape 5 : DNAT (portfarwading)
 
 **Firewall**
 
@@ -252,4 +247,3 @@ netplan try
 netplan apply
 netplan status
 ```
-*Memo : Le Firewall à du mal à s'activer refait cette expérience sur machine wiped pour voir comment fix.
