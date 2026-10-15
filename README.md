@@ -81,7 +81,7 @@ network:
   version: 2
 ```
 
-**Client LAN (Environnement sans Netplan)**
+**1. Client LAN (Environnement sans Netplan)**
 Fichier : `sudo nano /etc/network/interfaces`
 ```text
 auto enp0s3
@@ -91,8 +91,24 @@ iface enp0s3 inet static
     gateway 192.168.100.254
     dns-nameservers 8.8.8.8 1.1.1.1
 ```
-
-
+**2. Client LAN (Environnement sans Netplan)**
+```text
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp0s3:
+      dhcp4: false
+      addresses:
+        - 192.168.100.10/24
+      routes:
+        - to: default
+          via: 192.168.100.254
+      nameservers:
+        addresses:
+          - 8.8.8.8
+          - 1.1.1.1
+```
 ### 2.2 - Commandes d'application (Update des statuts)
 
 **Sur la DMZ et le Firewall (Application Netplan) :**
